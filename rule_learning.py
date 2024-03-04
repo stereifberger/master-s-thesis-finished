@@ -12,6 +12,23 @@ import pandas as pd
 from tqdm import tqdm
 import copy
 
+"""Define the nonterminals as lambda functions of terms and list them.
+The production rules are still very simple:
+  - r1: Returns a terminal.
+  - r2: Concatenates two terminals.
+  - r3: Syntactically like double negation, where a special terminal is iterated
+    two times before a terminal and this expression is encapsulated in two
+    instances of a special bracket term.
+"""
+def nonterm_gen(term_num):
+  r1 = lambda term: term
+  r2 = lambda term1, term2: f"{term_num + 2}{term1}{term2}{term_num + 2}"
+  r3 = lambda term1: f"{term_num + 2}{term_num + 3}{term_num + 3}{term1}{term_num + 2}"
+  nonterms = [r1, r2, r3]
+  global max_num
+  max_num = term_num + 10
+  return r1, r2, r3, nonterms, max_num
+
 """A class for generating premises and derivations to conclusions.
 Variables:
   - term_num: The number of terminal symbols
