@@ -12,14 +12,50 @@ import pandas as pd
 from tqdm import tqdm
 import copy
 
-"""Define the nonterminals as lambda functions of terms and list them.
-The production rules are still very simple:
-  - r1: Returns a terminal.
-  - r2: Concatenates two terminals.
-  - r3: Syntactically like double negation, where a special terminal is iterated
-    two times before a terminal and this expression is encapsulated in two
-    instances of a special bracket term.
-"""
+import pandas as pd
+
+"""Flatten a matrix to one dimension."""
+def flatten(matrix = list):
+  return(list(pd.core.common.flatten(matrix)))
+  
+"""Pad sublists of lists to same length. Necessary because in the task the
+output is longer than the input which is not possible in some architectures."""
+def pad(list_1 = list, list_2 = list):
+  for sublist in list_1:
+    while len(sublist) < len(max(list_2, key = len)):
+      sublist.append(0)
+  for sublist in list_2:
+    while len(sublist) < len(max(list_2, key = len)):
+      sublist.append(0)
+  return list_1, list_2
+
+"""Flatten all subsets of a list"""
+def out(y):
+  new = []
+  for x in y:
+    x = flatten(x)
+    new.append(x)
+  return new
+
+"""The second function uses the first to partition lists into subsets of length n.
+(https://www.geeksforgeeks.org/python-program-to-get-all-subsets-of-given-size-of-a-set/)"""
+def subsets(numbers):
+    if numbers == []:
+        return [[]]
+    x = subsets(numbers[1:])
+    return x + [[numbers[0]] + y for y in x]
+
+def subsets_with_length(numbers, n):
+    return [x for x in subsets(numbers) if len(x)==n]
+
+"""Numbers in list encoded as str or int are listed as single digit ints."""
+def to_int(data = list):
+  new_data = []
+  for i in data:
+    for t in str(i):
+      new_data.append(int(t))
+  return new_data
+
 def nonterm_gen(term_num):
   r1 = lambda term: term
   r2 = lambda term1, term2: f"{term_num + 2}{term1}{term2}{term_num + 2}"
@@ -29,15 +65,6 @@ def nonterm_gen(term_num):
   max_num = term_num + 10
   return r1, r2, r3, nonterms, max_num
 
-"""A class for generating premises and derivations to conclusions.
-Variables:
-  - term_num: The number of terminal symbols
-  - premises: The premises of a given derivation.
-  - iter_range: Number span from which the number of iterations
-    with which nonterminals are applied is randomly choosen.
-  - sample_size: Number of dervations generated.
-  - span_arg_num: Number span from which the number of generated
-    premises is randomly chosen."""
 
 class Derivation:
   def __init__(self,
