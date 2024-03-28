@@ -2,5 +2,5 @@
 def flatten(matrix = list):
   return(list(pd.core.common.flatten(matrix)))
 
-def plus(x,y):
-  return x+y
+def plus(x, y):
+  return x + y
