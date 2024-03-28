@@ -3,14 +3,14 @@ import pandas as pd
 """Flatten a matrix to one dimension."""
 def flatten(matrix = list):
   return(list(pd.core.common.flatten(matrix)))
-  
+
 """Pad sublists of lists to same length. Necessary because in the task the
 output is longer than the input which is not possible in some architectures."""
 def pad(list_1 = list, list_2 = list):
-  for sublist in list_1:
+  for sublist in tqdm(list_1, desc="Padded exmaples from X"):
     while len(sublist) < len(max(list_2, key = len)):
       sublist.append(0)
-  for sublist in list_2:
+  for sublist in tqdm(list_2, desc="Padded exmaples from y"):
     while len(sublist) < len(max(list_2, key = len)):
       sublist.append(0)
   return list_1, list_2
@@ -36,8 +36,9 @@ def subsets_with_length(numbers, n):
 
 """Numbers in list encoded as str or int are listed as single digit ints."""
 def to_int(data = list):
-  new_data = []
+  new_data = [0]
   for i in data:
     for t in str(i):
       new_data.append(int(t))
+    new_data.append(0)
   return new_data
