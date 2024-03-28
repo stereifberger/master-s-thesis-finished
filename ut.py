@@ -1,2 +1,2 @@
-def plus(x, y):
-  return x + y
+def ret(x):
+    return x
