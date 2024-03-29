@@ -9,10 +9,8 @@ def premises_gen(self):
   - X: The input to a network of the form [PREMISES, DELIMITER, CONCLUSION]
   - y: The output to a network of the form
     [PREMISES, DERIVATION STEP 1,.recursion_task.., DERIVATION STEP N, CONCLUSION]"""
-def dataset_builder(term_num = int,
-                    iter_range = list,
-                    sample_size = int,
-                    span_arg_num = list):
+def dataset_builder(iter_range = list,
+                    sample_size = int):
   X, y = [], []
   bar = tqdm(total=sample_size, desc="Generating example derivations")
   while len(X) < sample_size:
