@@ -1,15 +1,13 @@
 # Import libraries
-import numpy as np
-import random as rd
-from random import seed, randint, choice, shuffle
+from libs import *
+import util, calc, gnrn
 
 # Intuitionistic propositional logic
 ## Symbols
-t_nu = 9
 
 ## Generate random well-formed-formulas
 def rd_f(t_nu):
-    return rd.randint(1,t_nu)
+    return [randint(1,t_nu)]
 
 ## Define numerical values for symbols:
 symb = {"DE": [t_nu + 1],                               # DERIVES
@@ -21,18 +19,18 @@ symb = {"DE": [t_nu + 1],                               # DERIVES
         "FA": [t_nu + 7]}                               # FALSUM
 
 ## Definition of rules of intuitionistic propositional logic (INPL):
-fa_e = lambda prem: rd_f()                              # FALSUM_ELIMINATION
+fa_e = lambda prem: rd_f(t_nu)                              # FALSUM_ELIMINATION
 no_e = lambda prem: symb["FA"]                          # NOT_ELIMINATION
-n_ia = lambda prem: symb["NO"] + prem[1]                # NOT_INTRODUCTION_A
-n_ib = lambda prem: symb["NO"] + prem[0]                # NOT_INTRODUCTION_B 
-an_i = lambda prem: prem[0]    + symb["AN"] + prem[1]   # AND_INTRODUCTION
-a_ea = lambda prem: prem[0]                             # AND_ELIMINATION_A
-a_eb = lambda prem: prem[1]                             # AND_ELIMINATION_B
+n_ia = lambda prem: [symb["NO"]] + [prem[1]]                # NOT_INTRODUCTION_A
+n_ib = lambda prem: [symb["NO"]] + [prem[0]]                # NOT_INTRODUCTION_B 
+an_i = lambda prem: [prem[0]]    + [symb["AN"]] + [prem[1]]   # AND_INTRODUCTION
+a_ea = lambda prem: prem[0][0]                             # AND_ELIMINATION_A
+a_eb = lambda prem: prem[0][2]                             # AND_ELIMINATION_B
 t_ea = lambda prem: prem[0][2]                          # THEN_ELIMINATION_A
 t_eb = lambda prem: prem[1][2]                          # THEN_ELIMINATION_B
-th_i = lambda prem: prem[0]    + symb["TH"] + prem[1]   # THEN_INTRODUCTION
-o_ia = lambda prem: prem[0]    + symb["OR"] + rd_f()    # OR_INTRODUCTION_A
-o_ib = lambda prem: rd_d()     + symb["OR"] + prem[0]   # OR_INTRODUCTION_B
+th_i = lambda prem: [prem[0]]    + [symb["TH"]] + [prem[1]]   # THEN_INTRODUCTION
+o_ia = lambda prem: [prem[0]]    + [symb["OR"]] + [rd_f(t_nu)]    # OR_INTRODUCTION_A
+o_ib = lambda prem: [rd_f(t_nu)]     + [symb["OR"]] + [prem[0]]   # OR_INTRODUCTION_B
 
 ## List the rules of INPL
 inpl = [fa_e, no_e, n_ia, n_ib, an_i, a_ea,
@@ -44,7 +42,7 @@ def check(rule, prem = list):
         if rule == fa_e:                                # FALSUM_ELIMINATION
             if symb["FA"] == prem[0]:
                 return True
-        if rule == a_ea or rule == a_eb:                # AND_ELIMINATION
+        if rule == a_ea or rule == a_eb:                # AND_ELIMINATION_A and B
             if len(prem[0]) == 3:
                 if prem[0][1] == symb["AN"]:
                     return True
@@ -56,10 +54,10 @@ def check(rule, prem = list):
                 if prem[0] == symb["FA"]:
                     if prem[1] != symb["FA"]:
                         return True
-            if rule == n_ib                             # NOT_INTRODUCTION_B
+            if rule == n_ib:                             # NOT_INTRODUCTION_B
                 if prem[1] == symb["FA"]:
                     if prem[0] != symb["FA"]:
-                return True
+                        return True
         else:
             if rule == no_e:                            # NOT_ELIMINATION
                 if len(prem[0]) == 2:
