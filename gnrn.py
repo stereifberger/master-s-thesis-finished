@@ -10,6 +10,9 @@ t_nu = 9
     - y: The output to a network of the form
          [PREMISES, DERIVATION STEP 1,.recursion_task.., DERIVATION STEP N, CONCLUSION]"""
 
+# Define the data generation process. If the nettworks are trained on the class of all 
+# correct derivations then I only need the input data. Also in a future version at each
+# iteratio of applying rules a new input could be defined on it, making the function faster.
 def dat_b(itra = list, s_si = int):
     t_nu = 9
     inpt, outp = [], []
@@ -30,10 +33,11 @@ def dat_b(itra = list, s_si = int):
                 if calc.check(rule, prem):
                     cand.append(rule(prem))
             drva.append(choice(cand))
-        outp.append(drva)
         in_i.append(calc.symb["DE"])
         in_i.append(drva[-1])
-        inpt.append(in_i)
-        gbar.update(1)
+        if in_i not in inpt:
+            inpt.append(in_i)
+            outp.append(drva)
+            gbar.update(1)
     gbar.close()
     return inpt, outp
