@@ -1,4 +1,4 @@
-import pandas as pd
+from libs import *
 
 """Flatten a matrix to one dimension."""
 def flatten(matrix = list):
@@ -6,14 +6,11 @@ def flatten(matrix = list):
 
 """Pad sublists of lists to same length. Necessary because in the task the
 output is longer than the input which is not possible in some architectures."""
-def pad(list_1 = list, list_2 = list):
-  for sublist in tqdm(list_1, desc="Padded exmaples from X"):
-    while len(sublist) < len(max(list_2, key = len)):
-      sublist.append(0)
-  for sublist in tqdm(list_2, desc="Padded exmaples from y"):
-    while len(sublist) < len(max(list_2, key = len)):
-      sublist.append(0)
-  return list_1, list_2
+def pad(inpt = list):
+    for sublist in tqdm(inpt, desc="Padded exmaples from X"):
+        while len(sublist) < len(max(inpt, key = len)):
+            sublist.append(0)
+    return inpt
 
 """Flatten all subsets of a list"""
 def out(y):
@@ -42,3 +39,28 @@ def to_int(data = list):
       new_data.append(int(t))
     new_data.append(0)
   return new_data
+
+# Changed from GPT-4
+def lflt(inpt = list, insd=False):
+    # This list will hold the flattened version of the input_list
+    flat = []
+    
+    # If we're processing elements inside a sublist, add the opening symbol
+    if insd:
+        flat.append(calc.symb["DE"])
+    
+    for item in inpt:
+        # If the current itemsymb["DE"] is a list, we need to recursively flatten it
+        if isinstance(item, list):
+            # Extend the current flattened list with the recursively flattened sublist
+            # Notice we pass 'True' for the 'inside' flag to handle sublist brackets
+            flat.extend(lflt(item, True))
+        else:
+            # If it's not a list, just append the item to the flattened list
+            flat.append(item)
+
+    # If we're processing elements inside a sublist, add the closing symbol
+    if insd:
+        flat.append(calc.symb["DE"])
+    
+    return flat

@@ -18,4 +18,6 @@ import re
 import importlib
 import util, calc, gnrn
 from torch.utils.data import Dataset, DataLoader
+import torch
+import torch.nn.functional as F
 from sklearn.datasets import load_diabetes

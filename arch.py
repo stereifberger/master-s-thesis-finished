@@ -5,49 +5,27 @@ from libs import *
 
 class dset(data):
     def __init__(self,x,y):
-        self.x = torch.tensor(x,dtype=torch.float32)
-        self.y = torch.tensor(y,dtype=torch.float32)
         self.length = self.x.shape[0]
     def __getitem__(self,idx):
         return self.x[idx],self.y[idx]
     def __len__(self):
         return self.length
 
-#dataset = diabetesdataset(x,y)
-#importing the datasetfrom sklearn.datasets import load_diabetes
-#data = load_diabetes()
-#x = data['data']
-#y = data['target']#shape
-#print('shape of x is : ',x.shape)
-#print('shape of y is : ',y.shape)
 
-#class diabetesdataset(Dataset):
- #   def __init__(self,x,y):
- #       self.x = torch.tensor(x,dtype=torch.float32)
- #       self.y = torch.tensor(y,dtype=torch.float32)
- #       self.length = self.x.shape[0]  def __getitem__(self,idx):
- #       return self.x[idx],self.y[idx]  def __len__(self):
- #       return self.length
-#dataset = diabetesdataset(x,y)
+#creeating the networkfrom torch import nnclass net(nn.Module): 
+class net(nn.Module):
+    def __init__(self,input_size,output_size):
+    super(net,self).__init__()
+        self.l1 = nn.Linear(input_size,5)
+        self.relu = nn.ReLU()
+        self.l2 = nn.Linear(5,output_size)
 
-#dataloader
-dataloader = DataLoader(dataset=dataset,shuffle=True,batch_size=100)
+    def forward(self,x):
+        output = self.l1(x) 
+        output = self.relu(output)
+        output = self.l2(output)
+        return output
 
-#creeating the networkfrom torch import nnclass net(nn.Module):
-  def __init__(self,input_size,output_size):
-  super(net,self).__init__()
-    self.l1 = nn.Linear(input_size,5)
-    self.relu = nn.ReLU()
-    self.l2 = nn.Linear(5,output_size)  def forward(self,x):
-    output = self.l1(x) 
-    output = self.relu(output)
-    output = self.l2(output)
-    return output
-
-model = net(x.shape[1],1)
-criterion = nn.MSELoss()
-optimizer = torch.optim.SGD(model.parameters(),lr=0.001)
-epochs = 1500
 
 # training
 costval = []for j in range(epochs):
