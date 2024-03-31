@@ -2,7 +2,6 @@ from libs import *
 
 # https://medium.com/analytics-vidhya/pytorch-for-deep-learning-feed-forward-neural-network-d24f5870c18
 #dataset
-from torch.utils.data import Dataset, DataLoader
 
 class dset(data):
     def __init__(self,x,y):

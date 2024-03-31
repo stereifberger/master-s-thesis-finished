@@ -1,3 +1,6 @@
+#Values:
+t_nu = 9
+
 from keras.models import Sequential, Model
 from keras.layers import Input, Dense, SimpleRNN, TimeDistributed, LSTM, RepeatVector
 from tensorflow.keras.utils import to_categorical
@@ -14,3 +17,5 @@ import copy
 import re
 import importlib
 import util, calc, gnrn
+from torch.utils.data import Dataset, DataLoader
+from sklearn.datasets import load_diabetes
