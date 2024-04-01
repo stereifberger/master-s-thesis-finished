@@ -10,12 +10,22 @@ def rd_f(t_nu):
 
 ## Define numerical values for symbols:
 symb = {"DE": t_nu + 1,                                     # DERIVES
-        "BR": t_nu + 2,                                     # BRACKET
-        "NO": t_nu + 3,                                     # NOT
-        "TH": t_nu + 4,                                     # THEN
-        "OR": t_nu + 5,                                     # OR
-        "AN": t_nu + 6,                                     # AND
-        "FA": t_nu + 7}                                     # FALSUM
+        "LB": t_nu + 2,                                     # LEFT BRACKET
+        "RB": t_nu + 3,                                     # RIGHT BRACKET
+        "NO": t_nu + 4,                                     # NOT
+        "TH": t_nu + 5,                                     # THEN
+        "OR": t_nu + 6,                                     # OR
+        "AN": t_nu + 7,                                     # AND
+        "FA": t_nu + 8}                                     # FALSUM
+
+dsym = {t_nu + 1: "DE",
+        t_nu + 2:  "[",
+        t_nu + 3:  "]",
+        t_nu + 4: "NO",
+        t_nu + 5: "TH",
+        t_nu + 6: "OR",
+        t_nu + 7: "AN",
+        t_nu + 8: "FA"}
 
 ## Definition of rules of intuitionistic propositional logic (INPL):
 fa_e = lambda prem: rd_f(t_nu)                              # FALSUM_ELIMINATION

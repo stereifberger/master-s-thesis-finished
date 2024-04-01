@@ -1,9 +1,6 @@
 #Values:
 t_nu = 9
 
-from keras.models import Sequential, Model
-from keras.layers import Input, Dense, SimpleRNN, TimeDistributed, LSTM, RepeatVector
-from tensorflow.keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import matplotlib.pyplot as plt
@@ -16,8 +13,9 @@ from tqdm import tqdm
 import copy
 import re
 import importlib
-import util, calc, gnrn
 from torch.utils.data import Dataset, DataLoader
+import calc, util, gnrn, arch
 import torch
+from torch import nn
 import torch.nn.functional as F
 from sklearn.datasets import load_diabetes

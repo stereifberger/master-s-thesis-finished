@@ -1,7 +1,5 @@
 # Import libraries
 from libs import *
-from random import sample
-import util, calc
 
 t_nu = 9
 

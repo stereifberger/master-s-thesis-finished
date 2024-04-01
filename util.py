@@ -47,7 +47,7 @@ def lflt(inpt = list, insd=False):
     
     # If we're processing elements inside a sublist, add the opening symbol
     if insd:
-        flat.append(calc.symb["DE"])
+        flat.append(calc.symb["LB"])
     
     for item in inpt:
         # If the current itemsymb["DE"] is a list, we need to recursively flatten it
@@ -61,6 +61,24 @@ def lflt(inpt = list, insd=False):
 
     # If we're processing elements inside a sublist, add the closing symbol
     if insd:
-        flat.append(calc.symb["DE"])
+        flat.append(calc.symb["RB"])
     
     return flat
+
+
+def reve(inpt):
+    x_train_3d = inpt.view(len(inpt), int(len(inpt[0])/(t_nu+8)), t_nu+8)
+    inpt_reversed = []
+    for i in x_train_3d:
+        reverse_x_train = torch.argmax(i, dim=1)
+        brackets = [t_nu + 2, t_nu +3]
+        reverse_x_train = reverse_x_train.tolist()
+        reverse_x_train = ["[" if item == (t_nu + 2) else item for item in reverse_x_train]
+        reverse_x_train = ["]" if item == (t_nu + 3) else item for item in reverse_x_train]
+        reverse_x_train = [str(item) for item in reverse_x_train]
+        stri = ", ".join(str(item) for item in reverse_x_train)
+        stri = "[" + stri + "]"
+        stri = stri.replace("[,", "[").replace(", ]", "]")
+        reverse_x_train = eval(stri)
+        inpt_reversed.append(stri)
+    return inpt_reversed
