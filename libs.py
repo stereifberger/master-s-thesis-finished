@@ -1,5 +1,5 @@
 #Values:
-t_nu = 9
+t_nu = 5
 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
@@ -14,6 +14,7 @@ import copy
 import re
 import importlib
 from torch.utils.data import Dataset, DataLoader
+from torchvision import datasets, transforms
 import calc, util, gnrn, arch
 import torch
 from torch import nn

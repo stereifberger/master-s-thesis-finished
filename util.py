@@ -82,3 +82,45 @@ def reve(inpt):
         reverse_x_train = eval(stri)
         inpt_reversed.append(stri)
     return inpt_reversed
+
+
+def reve(inpt):
+    inpt_reversed = []
+    for i in inpt:
+        reverse_x_train = torch.argmax(i, dim=1)
+        reverse_x_train = reverse_x_train.tolist()
+        reverse_x_train = ["[" if item == (t_nu + 2) else item for item in reverse_x_train]
+        reverse_x_train = ["]" if item == (t_nu + 3) else item for item in reverse_x_train]
+        reverse_x_train = [str(item) for item in reverse_x_train]
+        stri = ", ".join(str(item) for item in reverse_x_train)
+        stri = "[" + stri + "]"
+        stri = stri.replace("[,", "[").replace(", ]", "]")
+        inpt_reversed.append(stri)
+    return inpt_reversed
+
+def reve_y(inpt):
+    inpt_reversed = []
+    for i in inpt:
+        _, indices = torch.max(i, dim=1)
+        reverse_x_train = F.one_hot(indices, num_classes=i.shape[1]) 
+        reverse_x_train = torch.argmax(i, dim=1)
+        reverse_x_train = reverse_x_train.tolist()
+        reverse_x_train = ["[" if item == (t_nu + 2) else item for item in reverse_x_train]
+        reverse_x_train = ["]" if item == (t_nu + 3) else item for item in reverse_x_train]
+        reverse_x_train = [str(item) for item in reverse_x_train]
+        stri = ", ".join(str(item) for item in reverse_x_train)
+        stri = "[" + stri + "]"
+        inpt_reversed.append(stri)
+    return inpt_reversed
+
+def convert_single(single_outp, outp_flt):
+    single_outp = util.lflt(single_outp)
+    padding_length = len(max(outp_flt, key = len))
+    while len(single_outp) < padding_length:
+        single_outp.append(0)
+    single_outp = torch.tensor(single_outp)
+    single_outp = F.one_hot(single_outp, num_classes=t_nu+8)
+    single_outp = np.array(single_outp)
+    single_outp = torch.tensor(single_outp, dtype= torch.float32)
+    single_outp = torch.flatten(single_outp)
+    return single_outp
