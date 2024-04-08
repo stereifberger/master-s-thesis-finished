@@ -1,11 +1,18 @@
 # Import libraries
-from libs import *
+from imports import *
+
+
+
+# Generate well-formed-formulas
+
 
 # Intuitionistic propositional logic
 ## Symbols
 
+
 ## Generate random well-formed-formulas
 def rd_f(t_nu):
+
     return randint(1,t_nu)
 
 ## Define numerical values for symbols:
@@ -27,22 +34,101 @@ dsym = {t_nu + 1: "DE",
         t_nu + 7: "AN",
         t_nu + 8: "FA"}
 
+def gen_wff(form, depth, max=2):
+    if depth > max or random() < 0.6:
+        return form
+    else:
+        rule = choice(wff_rules)
+        subform = rule(form, depth)
+        return subform
+
+
+def cona(form1, depth):
+    return [form1, symb["AN"], gen_wff(randint(1, t_nu), depth + 1)]
+
+def conb(form1, depth):
+    return [gen_wff(randint(1, t_nu), depth + 1), symb["AN"], form1]
+
+def disa(form1, depth):
+    return [form1, symb["OR"], gen_wff(randint(1, t_nu), depth + 1)]
+
+def disb(form1, depth):
+    return [gen_wff(randint(1, t_nu), depth + 1), symb["OR"], form1]
+
+def th_a(form1, depth):
+    return [form1, symb["TH"], gen_wff(randint(1, t_nu), depth + 1)]
+
+def th_b(form1, depth):
+    return [gen_wff(randint(1, t_nu), depth + 1), symb["TH"], form1]
+
+def neg(form1, depth):
+    return [symb["NO"], form1]
+
+wff_rules = [cona, conb, disa, disb, th_a, th_b, neg]
+
+### Definition of rules of intuitionistic propositional logic (INPL):
+
+def fa_e(prem):
+    return rd_f(t_nu)
+
+def no_e(prem):
+    return symb["FA"]
+
+def n_ia(prem):
+    return [symb["NO"]] + [prem[1]]
+
+def n_ib(prem):
+    return [symb["NO"]] + [prem[0]]
+
+def an_i(prem):
+    return [prem[0]] + [symb["AN"]] + [prem[1]]
+
+def a_ea(prem):
+    return prem[0][0]
+
+def a_eb(prem):
+    return prem[0][2]
+
+def t_ea(prem):
+    return prem[0][2]
+
+def t_eb(prem):
+    return prem[1][2]
+
+def th_i(prem):
+    return [prem[0]] + [symb["TH"]] + [prem[1]]
+
+def o_ia(prem):
+    return [prem[0]] + [symb["OR"]] + [rd_f(t_nu)]
+
+def o_ib(prem):
+    return [rd_f(t_nu)] + [symb["OR"]] + [prem[0]]
+## Rules
+#cona = lambda form1, depth: [form1, symb["AN"], gen_wff(randint(1,t_nu), depth + 1)]
+#conb = lambda form1, depth: [gen_wff(randint(1,t_nu), depth + 1),  symb["AN"], form1]
+#disa = lambda form1, depth: [form1, symb["OR"], gen_wff(randint(1,t_nu), depth + 1)]
+#disb = lambda form1, depth: [gen_wff(randint(1,t_nu), depth + 1), symb["OR"], form1]
+#th_a = lambda form1, depth: [form1, symb["TH"], gen_wff(randint(1,t_nu), depth + 1)]
+#th_b = lambda form1, depth: [gen_wff(randint(1,t_nu), depth + 1), symb["TH"], form1]
+#neg = lambda form1, depth: [symb["NO"], form1]
+#wff_rules = [cona, conb, disa, disb, th_a, th_b, neg]
+
 ## Definition of rules of intuitionistic propositional logic (INPL):
-fa_e = lambda prem: rd_f(t_nu)                              # FALSUM_ELIMINATION
-no_e = lambda prem: symb["FA"]                              # NOT_ELIMINATION
-n_ia = lambda prem: [symb["NO"]] + [prem[1]]                # NOT_INTRODUCTION_A
-n_ib = lambda prem: [symb["NO"]] + [prem[0]]                # NOT_INTRODUCTION_B 
-an_i = lambda prem: [prem[0]]    + [symb["AN"]] + [prem[1]] # AND_INTRODUCTION
-a_ea = lambda prem: prem[0][0]                              # AND_ELIMINATION_A
-a_eb = lambda prem: prem[0][2]                              # AND_ELIMINATION_B
-t_ea = lambda prem: prem[0][2]                              # THEN_ELIMINATION_A
-t_eb = lambda prem: prem[1][2]                              # THEN_ELIMINATION_B
-th_i = lambda prem: [prem[0]]    + [symb["TH"]] + [prem[1]] # THEN_INTRODUCTION
-o_ia = lambda prem: [prem[0]]    + [symb["OR"]] + [rd_f(t_nu)] # OR_INTRODUCTION_A
-o_ib = lambda prem: [rd_f(t_nu)] + [symb["OR"]] + [prem[0]] # OR_INTRODUCTION_B
+#fa_e = lambda prem: rd_f(t_nu)                              # FALSUM_ELIMINATION
+#no_e = lambda prem: symb["FA"]                              # NOT_ELIMINATION
+#n_ia = lambda prem: [symb["NO"]] + [prem[1]]                # NOT_INTRODUCTION_A
+#n_ib = lambda prem: [symb["NO"]] + [prem[0]]                # NOT_INTRODUCTION_B 
+#an_i = lambda prem: [prem[0]]    + [symb["AN"]] + [prem[1]] # AND_INTRODUCTION
+#a_ea = lambda prem: prem[0][0]                              # AND_ELIMINATION_A
+#a_eb = lambda prem: prem[0][2]                              # AND_ELIMINATION_B
+#t_ea = lambda prem: prem[0][2]                              # THEN_ELIMINATION_A
+#t_eb = lambda prem: prem[1][2]                              # THEN_ELIMINATION_B
+#th_i = lambda prem: [prem[0]]    + [symb["TH"]] + [prem[1]] # THEN_INTRODUCTION
+#o_ia = lambda prem: [prem[0]]    + [symb["OR"]] + [rd_f(t_nu)] # OR_INTRODUCTION_A
+#o_ib = lambda prem: [rd_f(t_nu)] + [symb["OR"]] + [prem[0]] # OR_INTRODUCTION_B
 
 ## List the rules of INPL
-inpl = [fa_e, no_e, n_ia, n_ib, an_i, a_ea,
+ipl = [fa_e, no_e, n_ia, n_ib, an_i, a_ea,
        a_eb, t_ea, t_eb, th_i, o_ia, o_ib]
 
 ## Define check for applicability of rule to premises via syntactic conditions:
@@ -72,7 +158,7 @@ def check(rule, prem = list):
             if rule == no_e:                            # NOT_ELIMINATION
                 if not isinstance(prem[0], int):
                     if len(prem[0]) == 2:
-                        if len(prem[1]) == 1:
+                        if isinstance(prem[1],int):
                             if prem[0][0] == symb["NO"]:
                                 if prem[0][1] == prem[1]:
                                     return True

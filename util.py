@@ -1,8 +1,20 @@
-from libs import *
+from imports import *
 
-"""Flatten a matrix to one dimension."""
-def flatten(matrix = list):
-  return(list(pd.core.common.flatten(matrix)))
+
+#"""Flatten a matrix to one dimension."""
+#def flatten(matrix = list):
+#  return(list(pd.core.common.flatten(matrix)))
+
+num_processes = cpu_count()
+def pad_single(sublist = list, pad_length = int):
+    return sublist + [0] * (pad_length - len(sublist))
+
+def pad_single_PA(sublist, max_length):
+    pad_partial_wrapper = partial(pad_single, max_length)
+    with Pool(processes = num_processes) as pool:
+        padded = list(tqdm(pool.imap(pad_partial_wrapper, sublist), total=len(sublist)))
+        return padded
+
 
 """Pad sublists of lists to same length. Necessary because in the task the
 output is longer than the input which is not possible in some architectures."""
@@ -12,13 +24,13 @@ def pad(inpt = list):
             sublist.append(0)
     return inpt
 
-"""Flatten all subsets of a list"""
-def out(y):
-  new = []
-  for x in y:
-    x = flatten(x)
-    new.append(x)
-  return new
+#"""Flatten all subsets of a list"""
+#def out(y):
+#  new = []
+#  for x in y:
+#    x = flatten(x)
+#    new.append(x)
+#  return new
 
 """The second function uses the first to partition lists into subsets of length n.
 (https://www.geeksforgeeks.org/python-program-to-get-all-subsets-of-given-size-of-a-set/)"""
@@ -47,7 +59,7 @@ def lflt(inpt = list, insd=False):
     
     # If we're processing elements inside a sublist, add the opening symbol
     if insd:
-        flat.append(calc.symb["LB"])
+        flat.append(calculi.symb["LB"])
     
     for item in inpt:
         # If the current itemsymb["DE"] is a list, we need to recursively flatten it
@@ -61,7 +73,7 @@ def lflt(inpt = list, insd=False):
 
     # If we're processing elements inside a sublist, add the closing symbol
     if insd:
-        flat.append(calc.symb["RB"])
+        flat.append(calculi.symb["RB"])
     
     return flat
 
@@ -113,13 +125,13 @@ def reve_y(inpt):
         inpt_reversed.append(stri)
     return inpt_reversed
 
-def convert_single(single_outp, outp_flt):
-    single_outp = util.lflt(single_outp)
-    padding_length = len(max(outp_flt, key = len))
+def convert_single(single_outp, max_y_train_len):
+    single_outp = lflt(single_outp)
+    padding_length = max_y_train_len
     while len(single_outp) < padding_length:
         single_outp.append(0)
     single_outp = torch.tensor(single_outp)
-    single_outp = F.one_hot(single_outp, num_classes=t_nu+8)
+    single_outp = F.one_hot(single_outp, num_classes=t_nu+9)
     single_outp = np.array(single_outp)
     single_outp = torch.tensor(single_outp, dtype= torch.float32)
     single_outp = torch.flatten(single_outp)
