@@ -1,21 +1,11 @@
 # Import libraries
 from imports import *
 
-
-
-# Generate well-formed-formulas
-
-
-# Intuitionistic propositional logic
-## Symbols
-
-
-## Generate random well-formed-formulas
+# Generate random well-formed-formulas
 def rd_f(t_nu):
-
     return randint(1,t_nu)
 
-## Define numerical values for symbols:
+# Define numerical values for symbols:
 symb = {"DE": t_nu + 1,                                     # DERIVES
         "LB": t_nu + 2,                                     # LEFT BRACKET
         "RB": t_nu + 3,                                     # RIGHT BRACKET
@@ -25,15 +15,7 @@ symb = {"DE": t_nu + 1,                                     # DERIVES
         "AN": t_nu + 7,                                     # AND
         "FA": t_nu + 8}                                     # FALSUM
 
-dsym = {t_nu + 1: "DE",
-        t_nu + 2:  "[",
-        t_nu + 3:  "]",
-        t_nu + 4: "NO",
-        t_nu + 5: "TH",
-        t_nu + 6: "OR",
-        t_nu + 7: "AN",
-        t_nu + 8: "FA"}
-
+# Function for recursive generation of well-formed formulas
 def gen_wff(form, depth, max=2):
     if depth > max or random() < 0.6:
         return form
@@ -42,120 +24,110 @@ def gen_wff(form, depth, max=2):
         subform = rule(form, depth)
         return subform
 
-
-def cona(form1, depth):
+# Rules for generating well formed formulas
+def cona(form1, depth):                                     # CONJUNCTION A
     return [form1, symb["AN"], gen_wff(randint(1, t_nu), depth + 1)]
 
-def conb(form1, depth):
+def conb(form1, depth):                                     # CONJUNCTION B
     return [gen_wff(randint(1, t_nu), depth + 1), symb["AN"], form1]
 
-def disa(form1, depth):
+def disa(form1, depth):                                     # DISJUNCTION A
     return [form1, symb["OR"], gen_wff(randint(1, t_nu), depth + 1)]
 
-def disb(form1, depth):
+def disb(form1, depth):                                     # DISJUNCTION B
     return [gen_wff(randint(1, t_nu), depth + 1), symb["OR"], form1]
 
-def th_a(form1, depth):
+def th_a(form1, depth):                                     # IMPLICATION A
     return [form1, symb["TH"], gen_wff(randint(1, t_nu), depth + 1)]
 
-def th_b(form1, depth):
+def th_b(form1, depth):                                     # IMPLICATION B
     return [gen_wff(randint(1, t_nu), depth + 1), symb["TH"], form1]
 
-def neg(form1, depth):
+def neg(form1, depth):                                      # NEGATION
     return [symb["NO"], form1]
 
 wff_rules = [cona, conb, disa, disb, th_a, th_b, neg]
 
-### Definition of rules of intuitionistic propositional logic (INPL):
-
-def fa_e(prem):
+# Definition of rules of intuitionistic propositional logic (IPL):
+def fa_e(prem):                                             # FALSUM ELIMINATION
     return rd_f(t_nu)
 
-def no_e(prem):
+def no_e(prem):                                             # NEGATION ELIMINATION
     return symb["FA"]
 
-def n_ia(prem):
+def n_ia(prem):                                             # NEGATION INTRODUCTION A
     return [symb["NO"]] + [prem[1]]
 
-def n_ib(prem):
+def n_ib(prem):                                             # NEGATION INTRODUCTION B
     return [symb["NO"]] + [prem[0]]
 
-def an_i(prem):
+def an_i(prem):                                             # CONJUNCTION INTRODUCTION
     return [prem[0]] + [symb["AN"]] + [prem[1]]
 
-def a_ea(prem):
+def a_ea(prem):                                             # CONJUNCTION ELIMINATION A
     return prem[0][0]
 
-def a_eb(prem):
+def a_eb(prem):                                             # CONJUNCTION ELIMINATION B
     return prem[0][2]
 
-def t_ea(prem):
+def t_ea(prem):                                             # IMPLICATION ELIMINATION A
     return prem[0][2]
 
-def t_eb(prem):
+def t_eb(prem):                                             # IMPLICATION ELIMINATION B
     return prem[1][2]
 
-def th_i(prem):
+def th_i(prem):                                             # IMPLICATION INTRODUCTION
     return [prem[0]] + [symb["TH"]] + [prem[1]]
 
-def o_ia(prem):
+def o_ia(prem):                                             # DISJUNCTION INTRODUCTION A
     return [prem[0]] + [symb["OR"]] + [rd_f(t_nu)]
 
-def o_ib(prem):
+def o_ib(prem):                                             # DISJUNCTION INTRODUCTION B
     return [rd_f(t_nu)] + [symb["OR"]] + [prem[0]]
-## Rules
-#cona = lambda form1, depth: [form1, symb["AN"], gen_wff(randint(1,t_nu), depth + 1)]
-#conb = lambda form1, depth: [gen_wff(randint(1,t_nu), depth + 1),  symb["AN"], form1]
-#disa = lambda form1, depth: [form1, symb["OR"], gen_wff(randint(1,t_nu), depth + 1)]
-#disb = lambda form1, depth: [gen_wff(randint(1,t_nu), depth + 1), symb["OR"], form1]
-#th_a = lambda form1, depth: [form1, symb["TH"], gen_wff(randint(1,t_nu), depth + 1)]
-#th_b = lambda form1, depth: [gen_wff(randint(1,t_nu), depth + 1), symb["TH"], form1]
-#neg = lambda form1, depth: [symb["NO"], form1]
-#wff_rules = [cona, conb, disa, disb, th_a, th_b, neg]
 
-## Definition of rules of intuitionistic propositional logic (INPL):
-#fa_e = lambda prem: rd_f(t_nu)                              # FALSUM_ELIMINATION
-#no_e = lambda prem: symb["FA"]                              # NOT_ELIMINATION
-#n_ia = lambda prem: [symb["NO"]] + [prem[1]]                # NOT_INTRODUCTION_A
-#n_ib = lambda prem: [symb["NO"]] + [prem[0]]                # NOT_INTRODUCTION_B 
-#an_i = lambda prem: [prem[0]]    + [symb["AN"]] + [prem[1]] # AND_INTRODUCTION
-#a_ea = lambda prem: prem[0][0]                              # AND_ELIMINATION_A
-#a_eb = lambda prem: prem[0][2]                              # AND_ELIMINATION_B
-#t_ea = lambda prem: prem[0][2]                              # THEN_ELIMINATION_A
-#t_eb = lambda prem: prem[1][2]                              # THEN_ELIMINATION_B
-#th_i = lambda prem: [prem[0]]    + [symb["TH"]] + [prem[1]] # THEN_INTRODUCTION
-#o_ia = lambda prem: [prem[0]]    + [symb["OR"]] + [rd_f(t_nu)] # OR_INTRODUCTION_A
-#o_ib = lambda prem: [rd_f(t_nu)] + [symb["OR"]] + [prem[0]] # OR_INTRODUCTION_B
+# Classical propositional logic (CPL) contains in addition:
+def d_ne(prem):                                             # DOUBLE NEGATION
+    return prem[2]
 
-## List the rules of INPL
+# List the rules of IPL
 ipl = [fa_e, no_e, n_ia, n_ib, an_i, a_ea,
        a_eb, t_ea, t_eb, th_i, o_ia, o_ib]
 
-## Define check for applicability of rule to premises via syntactic conditions:
+# List the rules of CPL
+ipl = [fa_e, no_e, n_ia, n_ib, an_i, a_ea,
+       a_eb, t_ea, t_eb, th_i, o_ia, o_ib, d_ne]
+
+# Define check for applicability of rule to premises via syntactic conditions:
 def check(rule, prem = list):
     if len(prem) == 1:
-        if rule == fa_e:                                # FALSUM_ELIMINATION
+        if rule == fa_e:                                    # FALSUM ELIMINATION
             if symb["FA"] == prem[0]:
                 return True
-        if rule == a_ea or rule == a_eb:                # AND_ELIMINATION_A and B
+        if rule == a_ea or rule == a_eb:                    # CONJUNCTION ELIMINATION A and B
             if not isinstance(prem[0], int):
                 if len(prem[0]) == 3:
                     if prem[0][1] == symb["AN"]:
                         return True
-        if rule == o_ia or rule == o_ib:                # OR_INTRODUCTION_A and B
+        if rule == o_ia or rule == o_ib:                    # DISJUNCTION INTRODUCTION A and B
             return True
+        if rule == d_ne:
+            if not isinstance(prem[0], int):
+                if len(prem[0]) == 3:                           # DOUBLE NEGATION
+                    if prem[0][0] == symb["NO"]:
+                        if prem[0][1] == symb["NO"]:
+                            return True
     if len(prem) == 2:
         if symb["FA"] == prem[0] or symb["FA"] == prem[1]:
-            if rule == n_ia:                            # NOT_INTRODUCTION_A
+            if rule == n_ia:                                # NEGATION INTRODUCTION A
                 if prem[0] == symb["FA"]:
                     if prem[1] != symb["FA"]:
                         return True
-            if rule == n_ib:                            # NOT_INTRODUCTION_B
+            if rule == n_ib:                                # NEGATION INTRODUCTION B
                 if prem[1] == symb["FA"]:
                     if prem[0] != symb["FA"]:
                         return True
         else:
-            if rule == no_e:                            # NOT_ELIMINATION
+            if rule == no_e:                                # NEGATION ELIMINATION
                 if not isinstance(prem[0], int):
                     if len(prem[0]) == 2:
                         if isinstance(prem[1],int):
@@ -168,21 +140,21 @@ def check(rule, prem = list):
                             if prem[1][0] == symb["NO"]:
                                 if prem[1][1] == prem[0]:
                                     return True
-            if rule == an_i:                            # AND_INTRODUCTION
+            if rule == an_i:                                # CONJUNCTION INTRODUCTION
                 return True
-            if rule == t_ea:                            # THEN_ELIMINATION_A
+            if rule == t_ea:                                # IMPLICATION ELIMINATION A
                 if not isinstance(prem[0], int):
                     if len(prem[0]) == 3:
                         if isinstance(prem[1], int):
                             if prem[0][1] == symb["TH"]:
                                 if prem[0][0] == prem[1]:
                                     return True
-            if rule == t_eb:                            # THEN_ELIMINATION_B
+            if rule == t_eb:                                # IMPLICATION ELIMINATION B
                 if not isinstance(prem[1], int):
                     if len(prem[1]) == 3:
                         if prem[0] == int:
                             if prem[1][1] == symb["TH"]:
                                 if prem[1][0] == prem[0]:
                                     return True
-            if rule == th_i:                            # THEN_INTRODUCTION
+            if rule == th_i:                                # IMPLICATION INTRODUCTION
                 return True
