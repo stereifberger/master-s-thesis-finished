@@ -31,7 +31,7 @@ import pandas as pd
 import copy
 import re
 import importlib
-import calculi, util, generation, architectures, losses
+import calculi, util, generation, architectures, losses_old
 from ipywidgets import IntText
 from IPython.display import display
 import time

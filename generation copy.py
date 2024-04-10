@@ -8,28 +8,31 @@ def create_dataset(iterations = list, calculus = list):
     sample_conclusions = get_conclusions(premises = prem,
                                          max_iterations = iterations[1],
                                          calculus = calculus)
-    print(len(drvas))
     drvas = [l for l in tqdm(drvas, desc =  "Checked derivations for sample conclusions") if l[-1] in sample_conclusions]
-    print(len(drvas))
     max_y_train = torch.tensor(util.lflt(max(drvas, key=len)))
-    #max_y_train_len = 14 * len(max_y_train)
+    max_y_train_len = 14 * len(max_y_train)
 
-    inpt, y_train_ordered, max_y_train_len = gen_optimized(drvas)
+    inpt, outp_dict = gen_optimized(drvas)
+    print(f"OU:{outp_dict}")
+
 
     inpt = np.array(inpt)
     inpt = torch.tensor(inpt, dtype= torch.float32)
 
 
+
+
     inpt_2d = inpt.view(inpt.size(0),-1)
+    inpt_2d = inpt_2d[:,1:]
     inpt_2d = torch.cat((inpt_2d[:,:1],inpt_2d[:,14:]), dim = 1)
 
-    inpt_3d = inpt
-    #inpt_3d = torch.cat((inpt_3d[:,:1],inpt_3d[:,14:]), dim = 1)
+    inpt_3d = inpt[:,1:]
+    inpt_3d = torch.cat((inpt_3d[:,:1],inpt_3d[:,14:]), dim = 1)
 
     # Print results
     print(f"Number x_train examples: {len(inpt)}")
-    print(f"Average number ground truth examples/x_train example: {len(drvas)/len(y_train_ordered)}")
-    return inpt_2d, inpt_3d, y_train_ordered, max_y_train_len
+    print(f"Average number ground truth examples/x_train example: {len(drvas)/len(outp_dict)}")
+    return inpt_2d, inpt_3d, outp_dict, max_y_train_len
 
 def get_conclusions(premises, max_iterations, calculus):
     drvas = []
@@ -47,7 +50,6 @@ def get_conclusions(premises, max_iterations, calculus):
         prev = len(drvas)
         for drva in tqdm(sub_drvas, desc = f"Processed premises for sample conclusions at iteration {iterations}"):
             subsets = util.subsets_with_length(drva, 1) + util.subsets_with_length(drva, 2)
-            subsets = sample(subsets, int(round(len(subsets)/(iterations*iterations))))
             for i in subsets:
                 cand = []
                 for rule in calculus:
@@ -94,7 +96,8 @@ def generate_derivations(iterations = list, calculus = list, prem = list):
                 drvas += drvas_proxy
             iter += 1
             
-    print(f"Number ground truth examples: {len(drvas)}")
+    print(f"Number ground truth examples in y_tdict: {len(drvas)}")
+    print(f"DRVAS:{drvas}")
     return drvas
 
 def process_subsets(args, calculus):
@@ -119,7 +122,7 @@ def gen_prem():
     while len(prem_pool) < 10000:   
         form = calculi.gen_wff(randint(1,t_nu), depth=0)
         prem_pool.append(form)
-    while len(prem) < 50:
+    while len(prem) < 100:
         new = sample(prem_pool, 2)
         if new not in prem:
             prem.append(new)
@@ -140,23 +143,16 @@ def to_immutable(obj):
         return tuple(to_immutable(item) for item in obj)
     return obj
 
-
 def gen_optimized(drvas):
-    y_train_ordered = []
     symb_DE = calculi.symb["DE"]
     unique_inputs = {}
     outp_dict = {}
     onehot_drvas  = [util.lflt(i) for i in drvas]
     onehot_drvas  = np.array(onehot_drvas, dtype=object)
     maxl = max(len(sub) for sub in onehot_drvas)
-    onehot_drvas = np.array([sub + [0] * (maxl - len(sub)) for sub in tqdm(onehot_drvas, desc =  "Padded x_train entries")])
-    onehot_drvas = torch.tensor(onehot_drvas) 
-    print(1)
-    onehot_drvas = [torch.cat([F.one_hot(i[j], num_classes=t_nu + 9) for j in range(len(i))], dim=-1) for i in tqdm(onehot_drvas)]
-    #onehot_drvas = parallel_pad(onehot_drvas)
-    #onehot_drvas = [F.one_hot(i[1:], num_classes=t_nu + 9) for i in onehot_drvas]
-    #onehot_drvas = torch.cat(onehot_drvas, dim=-1)
-    max_l = len(onehot_drvas[0])
+    onehot_drvas  = np.array([sub + [0] * (maxl - len(sub)) for sub in tqdm(onehot_drvas, desc =  "Padded x_train entries")])
+    onehot_drvas  = torch.tensor(onehot_drvas) 
+    onehot_drvas = [F.one_hot(i[1:], num_classes=t_nu + 9) for i in onehot_drvas]
     n = len(drvas)
 
 
@@ -172,26 +168,16 @@ def gen_optimized(drvas):
         if in_i not in unique_inputs:
             position = len(unique_inputs)
             unique_inputs[in_i] = position
-            y_train_ordered.append([one_drv])
+            outp_dict[position] = [one_drv]
         else:
             position = unique_inputs[in_i]
-            y_train_ordered[position].append(one_drv)
-    
+            outp_dict[position].append(one_drv)
 
     # Convert the unique_inputs dict keys back to list format if required
     inpt = [[pos] + recursively_convert_to_list(key) for key, pos in unique_inputs.items()]
-    print(2)
-    max_y = max(len(sub) for sub in y_train_ordered)
-    print(f"Second dim length: {max_y}")
-    y_padding = [0] * max_l
-    max_y_train_len = len(y_train_ordered[0][0])
-    print(3)
-    #y_train_ordered = [sub + [y_padding] * (max_y - len(sub)) for sub in tqdm(y_train_ordered, desc = "Padded y_train_ordered")]
-    #y_train_ordered = torch.tensor(y_train_ordered)
-    padded_y_train_ordered = [sub + [torch.tensor(y_padding)] * (max_y - len(sub)) for sub in tqdm(y_train_ordered, desc="Padded y_train_ordered")]
-    y_train_ordered = torch.stack([torch.stack(sub) for sub in padded_y_train_ordered])
+
     inpt = list_to_onehot(inpt)
-    return inpt, y_train_ordered, max_y_train_len
+    return inpt, outp_dict
 
 def list_to_onehot(list):
     inpt = [util.lflt(i) for i in list]
@@ -219,22 +205,3 @@ def recursively_convert_to_list(obj):
     if isinstance(obj, tuple):
         return [recursively_convert_to_list(item) for item in obj]
     return obj
-
-# GPT
-def process_item(item, t_nu):
-    return torch.cat([F.one_hot(i, num_classes=t_nu + 9) for i in item], dim=-1)
-
-def parallel_pad(input):
-    num_cores = cpu_count()  # Or set this to a fixed number of cores if desired
-
-    with Pool(processes=num_cores) as pool:
-        # Use partial to set the constant parameter `t_nu`
-        func = partial(process_item, t_nu=t_nu)
-        
-        # Distribute the work across the pool and collect results
-        # The tqdm wrapper allows for a progress bar
-        results = []
-        for result in tqdm(pool.imap_unordered(func, input), total=len(input)):
-            results.append(result)
-    return results
- 

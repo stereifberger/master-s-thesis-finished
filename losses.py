@@ -1,16 +1,18 @@
 from imports import *
 
-def mse_min_dist(y_pred, x_train, outp_dict, max_y_train_len, model):
+def min_dist(y_pred, x_train, y_train, max_y_train_len, model):
     counter = 0
+    y_train_collected = []
     loss_batch_list = []
     while counter < len(y_pred):
         val_i = y_pred[counter]
         x_i = x_train[counter]
+        print(f"COUNTER: {counter}")
         if model == "ffn":
-            y_train = outp_dict[int(x_i[0])]
+            print(f"KEY: {int(x_i[0])}")
+            y_t = y_train[int(x_i[0])]
         else:
-            y_train = outp_dict[int(x_i[0][0])]
-        if len(y_train) > 0:
+            y_t = y_train[int(x_i[0][0])]
             if len(y_train) > 1:
                 y = []
                 for i in y_train:
@@ -28,6 +30,34 @@ def mse_min_dist(y_pred, x_train, outp_dict, max_y_train_len, model):
             else:
                 y_train = y_train[0]
                 y_train = util.convert_single(y_train, max_y_train_len)
+        loss_batch_list.append(torch.mean((val_i - y_train) ** 2))
+        counter += 1
+    loss = sum(loss_batch_list)/len(loss_batch_list)
+    return loss
+
+def mse_min_dist(y_pred, x_train, outp_dict, max_y_train_len, model):
+    counter = 0
+    loss_batch_list = []
+    while counter < len(y_pred):
+        val_i = y_pred[counter]
+        x_i = x_train[counter]
+        if model == "ffn":
+            y_train = outp_dict[int(x_i[0])]
+        else:
+            y_train = outp_dict[int(x_i[0][0])]
+        if len(y_train) > 0:
+            if len(y_train) > 1:
+                distances = []
+                i = 0
+                while i < len(y_train):
+                    distance = pairwise_distance(y_train[i], val_i, keepdim=True).mean()
+                    distances.append(distance)
+                    i += 1
+                min_dist = max(distances) 
+                min = distances.index(min_dist)
+                y_train = y_train[min]
+            else:
+                y_train = y_train[0]
         loss_batch_list.append(torch.mean((val_i - y_train) ** 2))
         counter += 1
     loss = sum(loss_batch_list)/len(loss_batch_list)
