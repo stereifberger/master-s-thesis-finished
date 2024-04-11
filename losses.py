@@ -1,19 +1,18 @@
 from imports import *
+import torch
 
 # General custom loss function
 def mse_min_dist(y_pred, x_train, outp_dict, max_y_train_len, model):
     counter = 0
-    y_train_collected = []
     loss_batch_list = []
     while counter < len(y_pred):
         val_i = y_pred[counter]
         x_i = x_train[counter]
-        print(f"COUNTER: {counter}")
         if model == "ffn":
-            print(f"KEY: {int(x_i[0])}")
-            y_t = y_train[int(x_i[0])]
+            y_train = outp_dict[int(x_i[0])]
         else:
-            y_t = y_train[int(x_i[0][0])]
+            y_train = outp_dict[int(x_i[0][0])]
+        if len(y_train) > 0:
             if len(y_train) > 1:
                 distances = []
                 i = 0
