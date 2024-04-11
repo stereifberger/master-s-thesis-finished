@@ -32,11 +32,7 @@ import pandas as pd
 import copy
 import re
 import importlib
-<<<<<<< HEAD
-import calculi, util, generation, architectures, losses_old
-=======
-import calculi, util, generation, architectures
->>>>>>> cbc3fb1 (Cleaned up and made cells in implementation.py ready for training.)
+import calculi, util, generation, architectures, losses
 from ipywidgets import IntText
 from IPython.display import display
 import time

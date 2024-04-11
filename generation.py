@@ -15,11 +15,8 @@ def create_dataset(iterations = list, calculus = list):
     #max_y_train_len = 14 * len(max_y_train)
 
     inpt, y_train_ordered, max_y_train_len = gen_optimized(drvas)
-<<<<<<< HEAD
-=======
     print(f"LENINPT: {len(inpt)}")
     print(f"LENy_t: {len(y_train_ordered)}")
->>>>>>> cbc3fb1 (Cleaned up and made cells in implementation.py ready for training.)
 
     inpt = np.array(inpt)
     inpt = torch.tensor(inpt, dtype= torch.float32)
@@ -124,11 +121,7 @@ def gen_prem():
     while len(prem_pool) < 10000:   
         form = calculi.gen_wff(randint(1,t_nu), depth=0)
         prem_pool.append(form)
-<<<<<<< HEAD
-    while len(prem) < 50:
-=======
     while len(prem) < 30:
->>>>>>> cbc3fb1 (Cleaned up and made cells in implementation.py ready for training.)
         new = sample(prem_pool, 2)
         if new not in prem:
             prem.append(new)

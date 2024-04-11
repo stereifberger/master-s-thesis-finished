@@ -1,11 +1,7 @@
 from imports import *
 
-<<<<<<< HEAD
-def min_dist(y_pred, x_train, y_train, max_y_train_len, model):
-=======
 # General custom loss function
 def mse_min_dist(y_pred, x_train, outp_dict, max_y_train_len, model):
->>>>>>> cbc3fb1 (Cleaned up and made cells in implementation.py ready for training.)
     counter = 0
     y_train_collected = []
     loss_batch_list = []
@@ -35,25 +31,14 @@ def mse_min_dist(y_pred, x_train, outp_dict, max_y_train_len, model):
     loss = sum(loss_batch_list)/len(loss_batch_list)
     return loss
 
-<<<<<<< HEAD
-def mse_min_dist(y_pred, x_train, outp_dict, max_y_train_len, model):
-=======
 # The same but with all values loaded to the gpu
 def ffn_mse_min_dist(y_pred, x_train, outp_dict, max_y_train_len):
->>>>>>> cbc3fb1 (Cleaned up and made cells in implementation.py ready for training.)
     counter = 0
     loss_batch_list = []
     while counter < len(y_pred):
         val_i = y_pred[counter]
         x_i = x_train[counter]
-<<<<<<< HEAD
-        if model == "ffn":
-            y_train = outp_dict[int(x_i[0])]
-        else:
-            y_train = outp_dict[int(x_i[0][0])]
-=======
         y_train = outp_dict[int(x_i[0])]
->>>>>>> cbc3fb1 (Cleaned up and made cells in implementation.py ready for training.)
         if len(y_train) > 0:
             if len(y_train) > 1:
                 distances = []
@@ -70,9 +55,6 @@ def ffn_mse_min_dist(y_pred, x_train, outp_dict, max_y_train_len):
         loss_batch_list.append(torch.mean((val_i - y_train) ** 2))
         counter += 1
     loss = sum(loss_batch_list)/len(loss_batch_list)
-<<<<<<< HEAD
-    return loss
-=======
     return loss
 
 # Optimization of the above by gpt
@@ -154,4 +136,3 @@ def threed_mse_min_dist(y_pred, x_train, outp_dict, max_y_train_len):
         total_loss = torch.tensor(0.0, device=y_pred.device)  # No valid losses, return 0
     
     return total_loss
->>>>>>> cbc3fb1 (Cleaned up and made cells in implementation.py ready for training.)
