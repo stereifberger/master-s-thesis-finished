@@ -1,6 +1,7 @@
 #Values:
 t_nu = 5
 
+import losses
 from functools import partial
 from multiprocessing import Pool, cpu_count
 from torch.utils.data import DataLoader, random_split
@@ -31,7 +32,11 @@ import pandas as pd
 import copy
 import re
 import importlib
+<<<<<<< HEAD
 import calculi, util, generation, architectures, losses_old
+=======
+import calculi, util, generation, architectures
+>>>>>>> cbc3fb1 (Cleaned up and made cells in implementation.py ready for training.)
 from ipywidgets import IntText
 from IPython.display import display
 import time
