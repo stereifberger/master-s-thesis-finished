@@ -15,8 +15,23 @@ symb = {"DE": t_nu + 1,                                     # DERIVES
         "AN": t_nu + 7,                                     # AND
         "FA": t_nu + 8}                                     # FALSUM
 
+symb_reverse = {0: "",
+        1: "p",
+        2: "q",
+        3: "r",
+        4: "s",
+        5: "t",
+        t_nu + 1: "⊢",                                     # DERIVES
+        t_nu + 2: "(",                                     # LEFT BRACKET
+        t_nu + 3: ")",                                     # RIGHT BRACKET
+        t_nu + 4: "¬",                                     # NOT
+        t_nu + 5: "→",                                     # THEN
+        t_nu + 6: "∨",                                     # OR
+        t_nu + 7: "∧",                                     # AND
+        t_nu + 8: "⊥"}                                     # FALSUM
+
 # Function for recursive generation of well-formed formulas
-def gen_wff(form, depth, max=2):
+def gen_wff(form, depth, max=1):
     if depth > max or random() < 0.6:
         return form
     else:

@@ -1,4 +1,5 @@
 from imports import *
+from torch.nn.functional import pairwise_distance
 import torch
 
 # General custom loss function
@@ -56,8 +57,49 @@ def ffn_mse_min_dist(y_pred, x_train, outp_dict, max_y_train_len):
     loss = sum(loss_batch_list)/len(loss_batch_list)
     return loss
 
-# Optimization of the above by gpt
 def nffn_mse_min_dist(y_pred, x_train, outp_dict, max_y_train_len):
+    # Assuming each entry in y_pred corresponds to a set in outp_dict directly by index
+    # This approach attempts a more vectorized solution, but might need adjustments
+    
+    # Step 1: Vectorize distance calculation where possible
+    # Need careful tensor reshaping to broadcast correctly for batch distance computation
+    batch_losses = []
+    model_output_list = []
+    ground_truth_list = []
+    for idx, (y_pred_single, x_train_single) in enumerate(zip(y_pred, x_train)):
+        y_train_set = outp_dict[int(x_train_single[0])]  # Assuming this indexing is valid and returns a tensor
+
+        # If y_train_set is empty, continue to next
+        if y_train_set.nelement() == 0:
+            continue
+        
+        # This works by checking across dimension 1 (list_size), if there's any non-zero value
+        non_zero_mask = torch.any(y_train_set != 0, dim=1)
+
+        # Filter out zero lists using the mask
+        y_train_set = y_train_set[non_zero_mask]
+        y_pred_single_expanded = y_pred_single.unsqueeze(0).expand_as(y_train_set)
+        distances = torch.norm(y_train_set - y_pred_single_expanded, dim=1)  # Euclidean distance
+        
+        # Use distances to select the relevant y_train instance
+        min_distanCrossEntropyLossce, min_idx = torch.min(distances, dim=0)  # Find minimal distance
+        selected_y_train = y_train_set[min_idx]
+        criterion = nn.CrossEntropyLoss()
+        #print(y_pred_single)
+        #print(selected_y_train)
+        loss = criterion(y_pred_single, selected_y_train.float())
+        batch_losses.append(loss)
+
+    # Step 2: Aggregate losses from all instances in the batch
+    if batch_losses:
+        total_loss = torch.stack(batch_losses).mean()  # Stack losses and compute mean
+    else:
+        total_loss = torch.tensor(0.0, device=y_pred.device)  # No valid losses, return 0
+    
+    return total_loss
+
+# Optimization of the above by gpt
+def old_nffn_mse_min_dist(y_pred, x_train, outp_dict, max_y_train_len):
     # Assuming each entry in y_pred corresponds to a set in outp_dict directly by index
     # This approach attempts a more vectorized solution, but might need adjustments
     
@@ -85,7 +127,7 @@ def nffn_mse_min_dist(y_pred, x_train, outp_dict, max_y_train_len):
         selected_y_train = y_train_set[min_idx]
         
         # MSE Loss for selected instance
-        mse_loss = torch.mean((y_pred_single - selected_y_train) ** 2)
+        mse_loss = torch.mean((selected_y_train - y_pred_single) ** 2)
         batch_losses.append(mse_loss)
     
     # Step 2: Aggregate losses from all instances in the batch
@@ -123,11 +165,11 @@ def threed_mse_min_dist(y_pred, x_train, outp_dict, max_y_train_len):
         min_distance, min_idx = torch.min(distances, dim=0)  # Find minimal distance
         
         selected_y_train = y_train_set[min_idx]
-        
-        # MSE Loss for selected instance
-        mse_loss = torch.mean((y_pred_single - selected_y_train) ** 2)
-        batch_losses.append(mse_loss)
-    
+        criterion = nn.CrossEntropyLoss()
+        #print(y_pred_single)
+        #print(selected_y_train)
+        loss = criterion(y_pred_single, selected_y_train.float())
+        batch_losses.append(loss)
     # Step 2: Aggregate losses from all instances in the batch
     if batch_losses:
         total_loss = torch.stack(batch_losses).mean()  # Stack losses and compute mean
