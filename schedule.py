@@ -76,3 +76,26 @@ def sanity(model, dataloader, device, max_y_length):
                 print(f"INPUT: {test}")
                 print(f"OUTPUT: {pred}")
                 index += 1
+
+def sanity_r(model, dataloader, device, max_y_length):
+    with torch.no_grad():
+        for i, x_test in enumerate(dataloader):
+            x_test = x_test.to(device)
+            x_test = x_test.float()
+            print(x_test.shape)
+            y_pred = model(x_test[:,1:], max_y_length)               # Get the model's output for batch
+            index = 0
+            while index < len(y_pred):
+                pred = y_pred[index].reshape(-1, 14)
+                print(x_test.shape)
+                test = x_test[index][1:].reshape(-1, 14)
+                test = torch.argmax(test, dim=1) 
+                print(test.shape)
+                pred = torch.argmax(pred, dim=1) 
+                test = [calculi.symb_reverse[num.item()] for num in test]
+                test = ''.join(test)
+                pred = [calculi.symb_reverse[num.item()] for num in pred]
+                pred = ''.join(pred)
+                print(f"INPUT: {test}")
+                print(f"OUTPUT: {pred}")
+                index += 1
