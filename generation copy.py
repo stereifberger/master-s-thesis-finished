@@ -47,7 +47,7 @@ def get_conclusions(premises, max_iterations, calculus):
         prev = len(drvas)
         for drva in tqdm(sub_drvas, desc = f"Processed premises for sample conclusions at iteration {iterations}"):
             subsets = util.subsets_with_length(drva, 1) + util.subsets_with_length(drva, 2)
-            subsets = sample(subsets, int(round(len(subsets)/(iterations))))
+            subsets = sample(subsets, int(round(len(subsets)/(iterations*iterations))))
             for i in subsets:
                 cand = []
                 for rule in calculus:
@@ -115,10 +115,10 @@ def process_subsets(args, calculus):
 
 def gen_prem():
     prem, prem_pool = [], []
-    while len(prem_pool) < 30000:   
+    while len(prem_pool) < 20000:   
         form = calculi.gen_wff(randint(1,t_nu), depth=0)
         prem_pool.append(form)
-    while len(prem) < 2000:
+    while len(prem) < 500:
         new = sample(prem_pool, 2)
         if new not in prem:
             prem.append(new)
