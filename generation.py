@@ -118,7 +118,7 @@ def gen_prem():
     while len(prem_pool) < 30000:   
         form = calculi.gen_wff(randint(1,t_nu), depth=0)
         prem_pool.append(form)
-    while len(prem) < 2000:
+    while len(prem) < 200:
         new = sample(prem_pool, 2)
         if new not in prem:
             prem.append(new)
