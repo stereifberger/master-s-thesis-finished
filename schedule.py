@@ -2,6 +2,11 @@ from imports import *
 
 #https://medium.com/@hugmanskj/hands-on-implementing-a-simple-mathematical-calculator-using-sequence-to-sequence-learning-85b742082c72
 def train_model(model, dataloader_train, dataloader_test, optimizer, criterion, epochs, device, max_y_length, y_train):
+    CELtrain = []
+    CELtest = []
+    ACCtrain = []
+    ACCtest = []
+
     for epoch in range(epochs):
 
         # Train loss
@@ -22,13 +27,17 @@ def train_model(model, dataloader_train, dataloader_test, optimizer, criterion, 
             optimizer.step() #  <-- FOR PYTORCH
             epoch_loss += loss.item()
 
-        # Train Accuracy
-            _, predicted_train = torch.max(y_pred, 0)
-            print(predicted_train.shape)
-            print(y_train_collected.shape)
-            correct_train += (predicted_train == y_train_collected).sum().item()
-            total_train += y_train.size(0)
-        train_accuracy = correct_train / total_train
+        pred_labels = torch.argmax(y_pred, dim=-1)
+        target_labels = torch.argmax(y_train_collected, dim=-1)
+        pred_labels = pred_labels.view(-1)  # shape: [batch size * sequence length]
+        target_labels = target_labels.view(-1)
+        correct = (pred_labels == target_labels).sum().item()
+        total = target_labels.size(0)
+        train_accuracy = correct / total
+        ACCtrain.append(train_accuracy)
+
+        CELtrain.append(float(epoch_loss / len(dataloader_train)))
+
         del y_train_collected
         torch.cuda.empty_cache()
 
@@ -47,15 +56,20 @@ def train_model(model, dataloader_train, dataloader_test, optimizer, criterion, 
                     loss, y_test_collected  = losses.new_threed_mse_min_dist(y_pred, x_train, y_train, max_y_length, device) # Calculate loss
                 test_loss += loss
 
-                _, predicted_test = torch.max(y_pred, 0)
-                correct_test += (predicted_test == y_test_collected).sum().item()
-                total_test += y_train.size(0)
+        pred_labels = torch.argmax(y_pred, dim=-1)
+        target_labels = torch.argmax(y_test_collected, dim=-1)
+        pred_labels = pred_labels.view(-1)  # shape: [batch size * sequence length]
+        target_labels = target_labels.view(-1)
+        correct = (pred_labels == target_labels).sum().item()
+        total = target_labels.size(0)
+        test_accuracy = correct / total
 
-        test_accuracy = correct_test / total_test
+        CELtest.append(float(test_loss / len(dataloader_train)))
+        ACCtest.append(test_accuracy)
+        
 
-        print(f"""Ep. {epoch+1:02}, CRL-Train: {epoch_loss / len(dataloader_train):.4f} | CRL-Test: {test_loss / len(dataloader_test):.4f} | ACC-Train: {train_accuracy:.4f} | ACC-Tesh:  {test_accuracy:.4f}""")
-
-
+        print(f"""Ep. {epoch+1:02}, CEL-Train: {epoch_loss / len(dataloader_train):.4f} | CEL-Test: {test_loss / len(dataloader_test):.4f} | ACC-Train: {train_accuracy:.4f} | ACC-Test:  {test_accuracy:.4f}""")
+    return CELtrain, CELtest, ACCtrain, ACCtest 
 
 
 def sanity(model, dataloader, device, max_y_length):
