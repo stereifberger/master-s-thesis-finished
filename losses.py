@@ -81,3 +81,37 @@ def new_threed_mse_min_dist(y_pred, x_train, outp_dict, max_y_train_len, device)
         total_loss = torch.tensor(0.0, device=y_pred.device)  # No valid losses, return 0
     
     return total_loss, y_train_collected
+
+
+def new_new_threed_mse_min_dist(y_pred, x_train, outp_dict, max_y_train_len, device):
+    # Assuming each entry in y_pred corresponds to a set in outp_dict directly by index
+    # This approach attempts a more vectorized solution, but might need adjustments
+    
+    # Step 1: Vectorize distance calculation where possible
+    # Need careful tensor reshaping to broadcast correctly for batch distance computation
+    batch_losses = []
+    y_train_collected = torch.empty((0, len(outp_dict[0][0]), 14)).to(device)
+    for idx, (y_pred_single, x_train_single) in enumerate(zip(y_pred, x_train)):
+        if x_train_single.dim() == 2:
+            y_train_set = outp_dict[int(x_train_single[0][0])]
+        else:
+            y_train_set = outp_dict[int(x_train_single[0])]
+        if y_train_set.nelement() == 0:
+            continue
+        diff = y_train_set.size(1) - y_pred_single.size(0)
+        non_zero_mask = y_train_set.view(outp_dict.shape[1],-1).any(dim=1)
+        y_train_set = y_train_set[non_zero_mask]
+        y_pred_single = torch.nn.functional.pad(y_pred_single, (0, 0, 0, diff))
+        
+        target_tensor = y_pred_single.unsqueeze(0)
+        distances = torch.norm(y_train_set - y_pred_single, dim=[1, 2])
+        min_index = distances.argmin().item()
+
+        selected_y_train = y_train_set[min_index]
+        criterion = nn.CrossEntropyLoss()
+        
+        loss = criterion(y_pred_single, selected_y_train.float())
+        y_train_collected = torch.cat((y_train_collected, selected_y_train.unsqueeze(0)), dim=0)
+        batch_losses.append(loss)
+    
+    return batch_losses, y_train_collected

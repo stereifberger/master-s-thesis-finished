@@ -112,11 +112,11 @@ class Seq2Seq(nn.Module):
 
 ############################## Transformer written on basis of LSTM above by GPT
 class TransformerEncoder(nn.Module):
-    def __init__(self, input_dim, emb_dim, num_heads, hidden_dim, num_layers, max_seq_len=100):
+    def __init__(self, input_dim, emb_dim, num_heads, hidden_dim, num_layers, dropout, max_seq_len=100):
         super(TransformerEncoder, self).__init__()
         self.embedding = nn.Embedding(input_dim, emb_dim)
         self.positional_encoding = nn.Parameter(torch.zeros(1, max_seq_len, emb_dim))
-        encoder_layer = nn.TransformerEncoderLayer(d_model=emb_dim, nhead=num_heads, dim_feedforward=hidden_dim)
+        encoder_layer = nn.TransformerEncoderLayer(d_model=emb_dim, nhead=num_heads, dim_feedforward=hidden_dim, dropout=dropout)
         self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
 
     def forward(self, src):

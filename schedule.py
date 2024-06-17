@@ -51,10 +51,10 @@ def train_model(model, dataloader_train, dataloader_test, optimizer, criterion, 
                 x_test = x_test.to(device)
                 y_pred = model(x_test[:, 1:], max_y_length)
                 if y_train.dim() == 3:
-                    loss, y_test_collected  = losses.nffn_mse_min_dist(y_pred, x_train, y_train, max_y_length, device) # Calculate loss
+                    loss, y_test_collected  = losses.nffn_mse_min_dist(y_pred, x_test, y_train, max_y_length, device) # Calculate loss
                 else:
-                    loss, y_test_collected  = losses.new_threed_mse_min_dist(y_pred, x_train, y_train, max_y_length, device) # Calculate loss
-                test_loss += loss
+                    loss, y_test_collected  = losses.new_threed_mse_min_dist(y_pred, x_test, y_train, max_y_length, device) # Calculate loss
+                test_loss += loss.item()
 
         pred_labels = torch.argmax(y_pred, dim=-1)
         target_labels = torch.argmax(y_test_collected, dim=-1)
@@ -90,6 +90,32 @@ def sanity(model, dataloader, device, max_y_length):
                 print(f"INPUT: {test}")
                 print(f"OUTPUT: {pred}")
                 index += 1
+
+def sanity_with_loss(model, dataloader, y_train, device, max_y_length):
+    with torch.no_grad():
+        for i, x_test in enumerate(dataloader):
+            x_test = x_test.to(device)
+            #x_test = x_test.float()
+            y_pred = model(x_test[:,1:], max_y_length)               # Get the model's output for batch
+            if y_train.dim() == 3:
+                loss, y_train_collected = losses.nffn_mse_min_dist(y_pred, x_test, y_train, max_y_length, device) # Calculate loss
+            else:
+                loss, y_train_collected  = losses.new_new_threed_mse_min_dist(y_pred, x_test, y_train, max_y_length, device) # Calculate loss
+            index = 0
+            while index < len(y_pred):
+                pred = y_pred[index].reshape(-1, 14)
+                test = x_test[index][1:]
+                pred = torch.argmax(pred, dim=1) 
+                test = [calculi.symb_reverse[num.item()] for num in test]
+                test = ''.join(test)
+                pred = [calculi.symb_reverse[num.item()] for num in pred]
+                pred = ''.join(pred)
+                print(f"INPUT: {test}")
+                print(f"OUTPUT: {pred}")
+                print(f"OUTPUT: {loss[index]}")
+                index += 1
+            total_loss = torch.stack(loss).mean()  # Stack losses and compute mean
+            print(f"AVERAGE LOSS: {total_loss}")
 
 def sanity_r(model, dataloader, device, max_y_length):
     with torch.no_grad():
