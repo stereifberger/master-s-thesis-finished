@@ -1,4 +1,5 @@
 from imports import *
+import statistics
 
 #https://medium.com/@hugmanskj/hands-on-implementing-a-simple-mathematical-calculator-using-sequence-to-sequence-learning-85b742082c72
 def train_model(model, dataloader_train, dataloader_test, optimizer, criterion, epochs, device, max_y_length, y_train):
@@ -13,7 +14,7 @@ def train_model(model, dataloader_train, dataloader_test, optimizer, criterion, 
         model.train()
         correct_train = 0
         total_train = 0
-        epoch_loss = 0
+        epoch_loss = []
         for i, x_train in enumerate(dataloader_train):
             x_train = x_train.to(device)
             optimizer.zero_grad()  #  <-- FOR PYTORCH
@@ -23,9 +24,10 @@ def train_model(model, dataloader_train, dataloader_test, optimizer, criterion, 
                 loss, y_train_collected = losses.nffn_mse_min_dist(y_pred, x_train, y_train, max_y_length, device) # Calculate loss
             else:
                 loss, y_train_collected  = losses.new_threed_mse_min_dist(y_pred, x_train, y_train, max_y_length, device) # Calculate loss
+            epoch_loss.append(loss.item())
             loss.backward()  #  <-- FOR PYTORCH
             optimizer.step() #  <-- FOR PYTORCH
-            epoch_loss += loss.item()
+        train_loss = statistics.mean(epoch_loss)  # Stack losses and compute mean
 
         pred_labels = torch.argmax(y_pred, dim=-1)
         target_labels = torch.argmax(y_train_collected, dim=-1)
@@ -36,7 +38,8 @@ def train_model(model, dataloader_train, dataloader_test, optimizer, criterion, 
         train_accuracy = correct / total
         ACCtrain.append(train_accuracy)
 
-        CELtrain.append(float(epoch_loss / len(dataloader_train)))
+        #train_loss = epoch_loss / len(dataloader_train)
+        CELtrain.append(train_loss)
 
         del y_train_collected
         torch.cuda.empty_cache()
@@ -45,7 +48,7 @@ def train_model(model, dataloader_train, dataloader_test, optimizer, criterion, 
         model.eval()
         correct_test = 0
         total_test = 0
-        test_loss = 0
+        test_loss = []
         with torch.no_grad():
             for i, x_test in enumerate(dataloader_test):
                 x_test = x_test.to(device)
@@ -54,8 +57,9 @@ def train_model(model, dataloader_train, dataloader_test, optimizer, criterion, 
                     loss, y_test_collected  = losses.nffn_mse_min_dist(y_pred, x_test, y_train, max_y_length, device) # Calculate loss
                 else:
                     loss, y_test_collected  = losses.new_threed_mse_min_dist(y_pred, x_test, y_train, max_y_length, device) # Calculate loss
-                test_loss += loss.item()
+                test_loss.append(loss.item())
 
+        t_loss = statistics.mean(test_loss)  # Stack losses and compute mean
         pred_labels = torch.argmax(y_pred, dim=-1)
         target_labels = torch.argmax(y_test_collected, dim=-1)
         pred_labels = pred_labels.view(-1)  # shape: [batch size * sequence length]
@@ -63,13 +67,15 @@ def train_model(model, dataloader_train, dataloader_test, optimizer, criterion, 
         correct = (pred_labels == target_labels).sum().item()
         total = target_labels.size(0)
         test_accuracy = correct / total
-
-        CELtest.append(float(test_loss / len(dataloader_train)))
+        CELtest.append(float(t_loss))
         ACCtest.append(test_accuracy)
+
+        #train_loss = schedule.sanity_with_loss(model, dataloader_train, y_train, device, max_y_length)
+        #t_loss = schedule.sanity_with_loss(model, dataloader_test, y_train, device, max_y_length)
         
 
-        print(f"""Ep. {epoch+1:02}, CEL-Train: {epoch_loss / len(dataloader_train):.4f} | CEL-Test: {test_loss / len(dataloader_test):.4f} | ACC-Train: {train_accuracy:.4f} | ACC-Test:  {test_accuracy:.4f}""")
-    return CELtrain, CELtest, ACCtrain, ACCtest 
+        print(f"""Ep. {epoch+1:02}, CEL-Train: {train_loss:.4f}| CEL-Test: {t_loss:.4f} | ACC-Train: {train_accuracy:.4f} | ACC-Test:  {test_accuracy:.4f}""")
+    return CELtrain, CELtest, ACCtrain, ACCtest
 
 
 def sanity(model, dataloader, device, max_y_length):
@@ -93,29 +99,36 @@ def sanity(model, dataloader, device, max_y_length):
 
 def sanity_with_loss(model, dataloader, y_train, device, max_y_length):
     with torch.no_grad():
-        for i, x_test in enumerate(dataloader):
-            x_test = x_test.to(device)
+        col_loss_list = []
+        col_loss = 0
+        for i, x in enumerate(dataloader):
+            x = x.to(device)
             #x_test = x_test.float()
-            y_pred = model(x_test[:,1:], max_y_length)               # Get the model's output for batch
+            y_pred = model(x[:,1:], max_y_length)               # Get the model's output for batch
             if y_train.dim() == 3:
-                loss, y_train_collected = losses.nffn_mse_min_dist(y_pred, x_test, y_train, max_y_length, device) # Calculate loss
+                loss, y_train_collected = losses.nffn_mse_min_dist(y_pred, x, y_train, max_y_length, device) # Calculate loss
             else:
-                loss, y_train_collected  = losses.new_new_threed_mse_min_dist(y_pred, x_test, y_train, max_y_length, device) # Calculate loss
+                loss, y_train_collected  = losses.new_new_threed_mse_min_dist(y_pred, x, y_train, max_y_length, device) # Calculate loss
             index = 0
             while index < len(y_pred):
                 pred = y_pred[index].reshape(-1, 14)
-                test = x_test[index][1:]
+                test = x[index][1:]
                 pred = torch.argmax(pred, dim=1) 
                 test = [calculi.symb_reverse[num.item()] for num in test]
                 test = ''.join(test)
                 pred = [calculi.symb_reverse[num.item()] for num in pred]
                 pred = ''.join(pred)
-                print(f"INPUT: {test}")
-                print(f"OUTPUT: {pred}")
-                print(f"OUTPUT: {loss[index]}")
+                #print(f"INPUT: {test}")
+                #print(f"OUTPUT: {pred}")
+                #print(f"OUTPUT: {loss[index]}")
                 index += 1
             total_loss = torch.stack(loss).mean()  # Stack losses and compute mean
-            print(f"AVERAGE LOSS: {total_loss}")
+            #print(f"AVERAGE LOSS: {total_loss}")
+            col_loss_list.append(float(total_loss))
+            col_loss += float(total_loss)
+        com_loss = col_loss/len(col_loss_list)  # Stack losses and compute mean
+        #print(f"COLLECTED LOSS: {com_loss}")
+        return com_loss
 
 def sanity_r(model, dataloader, device, max_y_length):
     with torch.no_grad():

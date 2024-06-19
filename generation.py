@@ -103,8 +103,8 @@ def process_subsets(args, calculus):
         subsets = util.subsets_with_length(i, 1) + util.subsets_with_length(i, 2)
     else:
         subsets = [i]
-    if iterations > 3:
-        subsets = sample(subsets, int(round(len(subsets)/(iterations*iterations))))
+    if iterations > 2:
+        subsets = sample(subsets, int(round(len(subsets)/(iterations*iterations*iterations))))
     for d in subsets: 
         for rule in calculi.ipl:
             if calculi.check(rule, d):

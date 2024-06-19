@@ -109,7 +109,7 @@ ipl = [fa_e, no_e, n_ia, n_ib, an_i, a_ea,
        a_eb, t_ea, t_eb, th_i, o_ia, o_ib]
 
 # List the rules of CPL
-ipl = [fa_e, no_e, n_ia, n_ib, an_i, a_ea,
+cl = [fa_e, no_e, n_ia, n_ib, an_i, a_ea,
        a_eb, t_ea, t_eb, th_i, o_ia, o_ib, d_ne]
 
 # Define check for applicability of rule to premises via syntactic conditions:

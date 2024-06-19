@@ -3,13 +3,13 @@ from torch.nn.functional import pairwise_distance
 import torch
 from torch import nn
 
-def nffn_mse_min_dist(y_pred, x_train, outp_dict, max_y_train_len, device):
+def nffn_mse_min_dist(y_pred, input, outp_dict, max_y_train_len, device):
     batch_losses = []
     model_output_list = []
     ground_truth_list = []
     y_train_collected = torch.empty((0, len(outp_dict[0][0]))).to(device)
-    for idx, (y_pred_single, x_train_single) in enumerate(zip(y_pred, x_train)):
-        y_train_set = outp_dict[int(x_train_single[0])]  # Assuming this indexing is valid and returns a tensor
+    for idx, (y_pred_single, input_single) in enumerate(zip(y_pred, input)):
+        y_train_set = outp_dict[int(input_single[0])]  # Assuming this indexing is valid and returns a tensor
 
         # If y_train_set is empty, continue to next
         if y_train_set.nelement() == 0:
@@ -44,7 +44,7 @@ def reverse(inpt):
     inpt = ''.join(inpt)
     return inpt
 
-def new_threed_mse_min_dist(y_pred, x_train, outp_dict, max_y_train_len, device):
+def new_threed_mse_min_dist(y_pred, input, outp_dict, max_y_train_len, device):
     # Assuming each entry in y_pred corresponds to a set in outp_dict directly by index
     # This approach attempts a more vectorized solution, but might need adjustments
     
@@ -52,11 +52,11 @@ def new_threed_mse_min_dist(y_pred, x_train, outp_dict, max_y_train_len, device)
     # Need careful tensor reshaping to broadcast correctly for batch distance computation
     batch_losses = []
     y_train_collected = torch.empty((0, len(outp_dict[0][0]), 14)).to(device)
-    for idx, (y_pred_single, x_train_single) in enumerate(zip(y_pred, x_train)):
-        if x_train_single.dim() == 2:
-            y_train_set = outp_dict[int(x_train_single[0][0])]
+    for idx, (y_pred_single, input_single) in enumerate(zip(y_pred, input)):
+        if input_single.dim() == 2:
+            y_train_set = outp_dict[int(input_single[0][0])]
         else:
-            y_train_set = outp_dict[int(x_train_single[0])]
+            y_train_set = outp_dict[int(input_single[0])]
         if y_train_set.nelement() == 0:
             continue
         diff = y_train_set.size(1) - y_pred_single.size(0)
@@ -83,7 +83,7 @@ def new_threed_mse_min_dist(y_pred, x_train, outp_dict, max_y_train_len, device)
     return total_loss, y_train_collected
 
 
-def new_new_threed_mse_min_dist(y_pred, x_train, outp_dict, max_y_train_len, device):
+def new_new_threed_mse_min_dist(y_pred, input, outp_dict, max_y_train_len, device):
     # Assuming each entry in y_pred corresponds to a set in outp_dict directly by index
     # This approach attempts a more vectorized solution, but might need adjustments
     
@@ -91,11 +91,11 @@ def new_new_threed_mse_min_dist(y_pred, x_train, outp_dict, max_y_train_len, dev
     # Need careful tensor reshaping to broadcast correctly for batch distance computation
     batch_losses = []
     y_train_collected = torch.empty((0, len(outp_dict[0][0]), 14)).to(device)
-    for idx, (y_pred_single, x_train_single) in enumerate(zip(y_pred, x_train)):
-        if x_train_single.dim() == 2:
-            y_train_set = outp_dict[int(x_train_single[0][0])]
+    for idx, (y_pred_single, input_single) in enumerate(zip(y_pred, input)):
+        if input_single.dim() == 2:
+            y_train_set = outp_dict[int(input_single[0][0])]
         else:
-            y_train_set = outp_dict[int(x_train_single[0])]
+            y_train_set = outp_dict[int(input_single[0])]
         if y_train_set.nelement() == 0:
             continue
         diff = y_train_set.size(1) - y_pred_single.size(0)
