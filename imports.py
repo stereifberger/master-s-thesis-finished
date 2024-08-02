@@ -1,4 +1,4 @@
-#Values:
+# Define number of propositional variables
 t_nu = 5
 
 import losses
@@ -17,7 +17,6 @@ from torch.utils.data import Dataset, DataLoader
 import torch.utils.data as data
 import torch.nn as nn
 import torch.optim as optim
-from torch import nn
 import torch.nn.functional as F
 from torchvision import datasets, transforms
 from torch.nn.functional import pairwise_distance
@@ -32,6 +31,7 @@ import pandas as pd
 import copy
 import re
 import importlib
+import statistics
 import calculi, util, generation, architectures, losses, schedule
 from torch import Tensor
 from ipywidgets import IntText
@@ -45,3 +45,4 @@ from IPython.display import display
 from IPython.utils import io
 import json
 from matplotlib import font_manager as fm
+from torch.nn.functional import pairwise_distance

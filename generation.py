@@ -1,5 +1,4 @@
-# Import libraries
-from imports import *
+from imports import * # Import libraries
 outp_dict = {}
 
 def create_dataset(iterations = list, calculus = list):
@@ -10,7 +9,6 @@ def create_dataset(iterations = list, calculus = list):
                                          calculus = calculus)
     drvas = [l for l in tqdm(drvas, desc =  "Checked derivations for sample conclusions") if l[-1] in sample_conclusions]
     max_y_train = torch.tensor(util.lflt(max(drvas, key=len)))
-    #max_y_train_len = 14 * len(max_y_train)
 
     inpt, y_train_ordered, max_y_train_len = gen_optimized(drvas)
     print(f"LENINPT: {len(inpt)}")
@@ -24,7 +22,6 @@ def create_dataset(iterations = list, calculus = list):
     inpt_2d = torch.cat((inpt_2d[:,:1],inpt_2d[:,14:]), dim = 1)
 
     inpt_3d = inpt
-    #inpt_3d = torch.cat((inpt_3d[:,:1],inpt_3d[:,14:]), dim = 1)
 
     # Print results
     print(f"Number x_train examples: {len(inpt)}")
@@ -151,9 +148,6 @@ def gen_optimized(drvas):
     onehot_drvas = np.array([sub + [0] * (maxl - len(sub)) for sub in tqdm(onehot_drvas, desc =  "Padded x_train entries")])
     onehot_drvas = torch.tensor(onehot_drvas) 
     onehot_drvas = [torch.cat([F.one_hot(i[j], num_classes=t_nu + 9) for j in range(len(i))], dim=-1) for i in tqdm(onehot_drvas)]
-    #onehot_drvas = parallel_pad(onehot_drvas)
-    #onehot_drvas = [F.one_hot(i[1:], num_classes=t_nu + 9) for i in onehot_drvas]
-    #onehot_drvas = torch.cat(onehot_drvas, dim=-1)
     max_l = len(onehot_drvas[0])
     n = len(drvas)
 
@@ -181,8 +175,6 @@ def gen_optimized(drvas):
     max_y = max(len(sub) for sub in y_train_ordered)
     y_padding = [0] * max_l
     max_y_train_len = len(y_train_ordered[0][0])
-    #y_train_ordered = [sub + [y_padding] * (max_y - len(sub)) for sub in tqdm(y_train_ordered, desc = "Padded y_train_ordered")]
-    #y_train_ordered = torch.tensor(y_train_ordered)
     padded_y_train_ordered = [sub + [torch.tensor(y_padding)] * (max_y - len(sub)) for sub in tqdm(y_train_ordered, desc="Padded y_train_ordered")]
     y_train_ordered = torch.stack([torch.stack(sub) for sub in padded_y_train_ordered])
     inpt = list_to_onehot(inpt)

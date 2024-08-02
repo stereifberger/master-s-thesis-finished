@@ -1,5 +1,4 @@
-from imports import *
-import statistics
+from imports import * # Import libraries
 
 #https://medium.com/@hugmanskj/hands-on-implementing-a-simple-mathematical-calculator-using-sequence-to-sequence-learning-85b742082c72
 def train_model(model, dataloader_train, dataloader_test, optimizer, criterion, epochs, device, max_y_length, y_train):
@@ -21,9 +20,9 @@ def train_model(model, dataloader_train, dataloader_test, optimizer, criterion, 
 
             y_pred = model(x_train[:,1:], max_y_length)               # Get the model's output for batch
             if y_train.dim() == 3:
-                loss, y_train_collected = losses.nffn_mse_min_dist(y_pred, x_train, y_train, max_y_length, device) # Calculate loss
+                loss, y_train_collected = losses.mse_loss_ffn(y_pred, x_train, y_train, max_y_length, device) # Calculate loss
             else:
-                loss, y_train_collected  = losses.new_threed_mse_min_dist(y_pred, x_train, y_train, max_y_length, device) # Calculate loss
+                loss, y_train_collected  = losses.mse_loss(y_pred, x_train, y_train, max_y_length, device) # Calculate loss
             epoch_loss.append(loss.item())
             loss.backward()  #  <-- FOR PYTORCH
             optimizer.step() #  <-- FOR PYTORCH
@@ -38,7 +37,6 @@ def train_model(model, dataloader_train, dataloader_test, optimizer, criterion, 
         train_accuracy = correct / total
         ACCtrain.append(train_accuracy)
 
-        #train_loss = epoch_loss / len(dataloader_train)
         CELtrain.append(train_loss)
 
         del y_train_collected
@@ -54,9 +52,9 @@ def train_model(model, dataloader_train, dataloader_test, optimizer, criterion, 
                 x_test = x_test.to(device)
                 y_pred = model(x_test[:, 1:], max_y_length)
                 if y_train.dim() == 3:
-                    loss, y_test_collected  = losses.nffn_mse_min_dist(y_pred, x_test, y_train, max_y_length, device) # Calculate loss
+                    loss, y_test_collected  = losses.mse_loss_ffn(y_pred, x_test, y_train, max_y_length, device) # Calculate loss
                 else:
-                    loss, y_test_collected  = losses.new_threed_mse_min_dist(y_pred, x_test, y_train, max_y_length, device) # Calculate loss
+                    loss, y_test_collected  = losses.mse_loss(y_pred, x_test, y_train, max_y_length, device) # Calculate loss
                 test_loss.append(loss.item())
 
         t_loss = statistics.mean(test_loss)  # Stack losses and compute mean
@@ -70,19 +68,15 @@ def train_model(model, dataloader_train, dataloader_test, optimizer, criterion, 
         CELtest.append(float(t_loss))
         ACCtest.append(test_accuracy)
 
-        #train_loss = schedule.sanity_with_loss(model, dataloader_train, y_train, device, max_y_length)
-        #t_loss = schedule.sanity_with_loss(model, dataloader_test, y_train, device, max_y_length)
-        
-
         print(f"""Ep. {epoch+1:02}, CEL-Train: {train_loss:.4f}| CEL-Test: {t_loss:.4f} | ACC-Train: {train_accuracy:.4f} | ACC-Test:  {test_accuracy:.4f}""")
     return CELtrain, CELtest, ACCtrain, ACCtest
 
-
 def sanity(model, dataloader, device, max_y_length):
+    input_list = []
+    output_list = []
     with torch.no_grad():
         for i, x_test in enumerate(dataloader):
             x_test = x_test.to(device)
-            #x_test = x_test.float()
             y_pred = model(x_test[:,1:], max_y_length)               # Get the model's output for batch
             index = 0
             while index < len(y_pred):
@@ -93,62 +87,7 @@ def sanity(model, dataloader, device, max_y_length):
                 test = ''.join(test)
                 pred = [calculi.symb_reverse[num.item()] for num in pred]
                 pred = ''.join(pred)
-                print(f"INPUT: {test}")
-                print(f"OUTPUT: {pred}")
                 index += 1
-
-def sanity_with_loss(model, dataloader, y_train, device, max_y_length):
-    with torch.no_grad():
-        col_loss_list = []
-        col_loss = 0
-        for i, x in enumerate(dataloader):
-            x = x.to(device)
-            #x_test = x_test.float()
-            y_pred = model(x[:,1:], max_y_length)               # Get the model's output for batch
-            if y_train.dim() == 3:
-                loss, y_train_collected = losses.nffn_mse_min_dist(y_pred, x, y_train, max_y_length, device) # Calculate loss
-            else:
-                loss, y_train_collected  = losses.new_new_threed_mse_min_dist(y_pred, x, y_train, max_y_length, device) # Calculate loss
-            index = 0
-            while index < len(y_pred):
-                pred = y_pred[index].reshape(-1, 14)
-                test = x[index][1:]
-                pred = torch.argmax(pred, dim=1) 
-                test = [calculi.symb_reverse[num.item()] for num in test]
-                test = ''.join(test)
-                pred = [calculi.symb_reverse[num.item()] for num in pred]
-                pred = ''.join(pred)
-                #print(f"INPUT: {test}")
-                #print(f"OUTPUT: {pred}")
-                #print(f"OUTPUT: {loss[index]}")
-                index += 1
-            total_loss = torch.stack(loss).mean()  # Stack losses and compute mean
-            #print(f"AVERAGE LOSS: {total_loss}")
-            col_loss_list.append(float(total_loss))
-            col_loss += float(total_loss)
-        com_loss = col_loss/len(col_loss_list)  # Stack losses and compute mean
-        #print(f"COLLECTED LOSS: {com_loss}")
-        return com_loss
-
-def sanity_r(model, dataloader, device, max_y_length):
-    with torch.no_grad():
-        for i, x_test in enumerate(dataloader):
-            x_test = x_test.to(device)
-            x_test = x_test.float()
-            print(x_test.shape)
-            y_pred = model(x_test[:,1:], max_y_length)               # Get the model's output for batch
-            index = 0
-            while index < len(y_pred):
-                pred = y_pred[index].reshape(-1, 14)
-                print(x_test.shape)
-                test = x_test[index][1:].reshape(-1, 14)
-                test = torch.argmax(test, dim=1) 
-                print(test.shape)
-                pred = torch.argmax(pred, dim=1) 
-                test = [calculi.symb_reverse[num.item()] for num in test]
-                test = ''.join(test)
-                pred = [calculi.symb_reverse[num.item()] for num in pred]
-                pred = ''.join(pred)
-                print(f"INPUT: {test}")
-                print(f"OUTPUT: {pred}")
-                index += 1
+                input_list.append(test)
+                output_list.append(pred)
+    return input_list, output_list
