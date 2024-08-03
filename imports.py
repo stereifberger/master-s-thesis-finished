@@ -1,15 +1,6 @@
 # Define number of propositional variables
 t_nu = 5
 
-import losses
-from functools import partial
-from multiprocessing import Pool, cpu_count
-from torch.utils.data import DataLoader, random_split
-
-# NumPy
-import numpy as np
-from numpy import argmax
-
 # PyTorch
 import torch
 from torch import nn
@@ -20,6 +11,15 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torchvision import datasets, transforms
 from torch.nn.functional import pairwise_distance
+
+import losses
+from functools import partial
+from multiprocessing import Pool, cpu_count
+from torch.utils.data import DataLoader, random_split
+
+# NumPy
+import numpy as np
+from numpy import argmax
 
 # Other libraries
 from tqdm.notebook import tqdm
@@ -38,7 +38,6 @@ from ipywidgets import IntText
 from IPython.display import display
 import time
 import math
-import copy
 import contextlib
 import io
 from IPython.display import display
